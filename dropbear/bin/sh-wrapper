@@ -16,6 +16,7 @@ export ENV='/data/etc/.profile'
 
 cd /data/hack
 
+chmod +x /etc/motd
 sh /etc/motd
 
-sh /bin/sh "$@"
+/bin/sh "$@"
