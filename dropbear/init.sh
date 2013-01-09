@@ -26,6 +26,7 @@ if [ "$1" == "start" ]; then
 
   # creat keys if needed
 
+  [ -d ${BASEDIR}/home/root ] || mkdir -m 0755 ${BASEDIR}/home
   [ -d ${BASEDIR}/home/root ] || mkdir -m 0755 ${BASEDIR}/home/root
   [ -d ${CONFDIR} ] || mkdir -p ${CONFDIR};
   [ -f ${CONFDIR}/dropbear_rsa_host_key ] || dropbearkey -t rsa -f ${CONFDIR}/dropbear_rsa_host_key
