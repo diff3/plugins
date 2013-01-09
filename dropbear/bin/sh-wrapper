@@ -1,6 +1,5 @@
 #!/bin/sh
 
-#!/bin/sh
 THEPATH='/data/hack/bin:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/opt/local/sbin:/usr/local/sbin:/usr/sbin:/sbin:/scripts'
 
 for f in /data/plugins/*; do
@@ -14,9 +13,9 @@ export LD_LIBRARY_PATH='.:/data/hack/lib:/opt/local/lib:/usr/local/lib:/usr/lib:
 export HOME='/data/hack'
 export ENV='/data/etc/.profile'
 
-sh /etc/motd
 
 cd /data/hack
-/bin/sh "$@"
 
+sh /etc/motd
 
+sh /bin/sh "$@"
