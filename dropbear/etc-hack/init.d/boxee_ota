@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+MODHOME=/lib/modules/2.6.28
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+	debug_print "Initializing Hauppauge 950Q modules..."
+	try_command insmod ${MODHOME}/au8522.ko
+	try_command insmod ${MODHOME}/tuner.ko
+	try_command insmod ${MODHOME}/tveeprom.ko
+	try_command insmod ${MODHOME}/xc5000.ko no_poweroff=1
+	try_command insmod ${MODHOME}/au0828.ko
+
+	debug_print "Initializing Hauppauge NOVA-T modules..."
+	try_command insmod ${MODHOME}/dibx000_common.ko
+	try_command insmod ${MODHOME}/dib7000p.ko
+	try_command insmod ${MODHOME}/dib7000m.ko
+	try_command insmod ${MODHOME}/dib3000mc.ko
+	try_command insmod ${MODHOME}/dib0070.ko
+	try_command insmod ${MODHOME}/dvb-usb.ko
+	try_command insmod ${MODHOME}/dvb-usb-dib0700.ko
+
+	exit 0
+}
+
+stop_function() {
+	debug_print "Deinitializing Hauppauge 950Q modules..."
+    rmmod au0828.ko
+    rmmod xc5000.ko
+    rmmod tveeprom.ko
+    rmmod tuner.ko
+    rmmod au8522.ko
+
+	debug_print "Deinitializing Hauppauge NOVA-T modules..."
+    rmmod dvb-usb-dib0700.ko
+    rmmod dvb-usb.ko
+    rmmod dib0070.ko
+    rmmod dib3000mc.ko
+    rmmod dib7000m.ko
+    rmmod dib7000p.ko
+    rmmod dibx000_common.ko
+
+	exit 0
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

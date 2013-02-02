@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    #Install the GDL minimal modules
+    try_command insmod /lib/modules/gdl_mm.ko
+    try_command ulimit -c unlimited
+
+    debug_print "Create device nodes for gdl_mm"
+    rm -rf /dev/gdl/
+    mkdir -p /dev/gdl
+    make_dev gdl gdl/0
+    make_dev gdl_track gdl/track
+
+    try_command /bin/gdl_server 2>&1 >/dev/console
+
+    debug_print "load component TV encoder..."
+    try_command /bin/load_pd /lib/pd_inttvenc_comp.so
+
+    debug_print "load composite pd..."
+    try_command /bin/load_pd /lib/pd_inttvenc_cvbs.so
+
+    # The following commented out command modifies the Analog Devices video
+    # buffer settings found on Intel® Media Processor CE 3100 Development
+    # Platform boards. It should be enabled by those using HD modes on these
+    # boards. It should not be used on any other development platforms, or
+    # customer boards.
+    #
+    #    /bin/video_buffer -36_36 -SD_1
+
+    debug_print "GDL setup completed!"
+}
+
+stop_function() {
+    # Kill the GDL server daemon -- this takes the port drivers with it
+    killall gdl_server
+
+    # Give the daemon a chance to break its connection with the kernel module
+    # before unloading
+    sleep 1
+
+    # Unload the kenrel module
+    rmmod gdl_mm
+
+    # Remove GDL devices
+    rm -Rf /dev/gdl
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

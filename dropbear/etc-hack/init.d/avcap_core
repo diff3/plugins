@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+
+. /etc/init.d/init_utilities
+
+start_function() {
+
+    # Install AVCAP core driver
+    debug_print "Load AVCAP core driver"
+    try_command insmod /lib/modules/avcap_core.ko
+
+    # Create device node for AVCAP core
+    debug_print "Create device node for AVCAP core"
+    make_dev avcap_core avcap_core
+
+    # Install native capture driver[s]
+    debug_print "Load native AVCAP drivers"
+    try_command insmod /lib/modules/avcap_synthetic.ko video_play=1 audio_play=1
+
+    # We are done
+    debug_print "AVCAP setup completed!"
+}
+
+stop_function() {
+
+    # Unload kernel modules
+    rmmod avcap_synthetic
+
+    rmmod avcap_core
+
+    # Remove AVCAP core device file
+    rm -rf /dev/avcap_core
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

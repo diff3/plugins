@@ -1,0 +1,18 @@
+/* local_tweaks.hcfg
+ *
+ * feel free to modify this file, avoid modifying platform_config.hcfg
+ *
+ * local (non-default) platform configuration tweaks 
+ *
+ * the parameters in this file will be loaded AFTER 
+ *      platform_config.hcfg
+ *
+ * and will override those values
+ *
+ *   example:
+ *
+ *  platform.software.drivers.smd.vidrend.display_first_frame_fast = 1
+   
+    Clock Driver : If you want to use VCXO/DDS, set the value appropriately in the platform_config.hcfg   
+ *
+ */

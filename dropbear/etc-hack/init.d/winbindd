@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # Start winbindd if so equipped
+    if [ ! -f /data/etc/secrets.tdb ]
+    then
+        /opt/local/bin/smbpasswd -c /data/etc/smb.conf -a guest -n 2>&1 >/dev/null
+     fi
+    debug_print "Trying to start winbindd"
+    try_command /opt/local/sbin/winbindd -s /data/etc/smb.conf
+}
+
+stop_function() {
+    pid=$(pidof winbindd) && kill $pid
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

@@ -1,0 +1,51 @@
+#!/bin/sh
+#-----------------------------------------------------------------------------
+# Copyright (c) 2007-2009 Intel Corporation
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # Load the graphics kernel module
+    try_command insmod /lib/modules/pvrsrvkm.ko
+    
+    # Create the device node
+    make_dev pvrsrvkm pvrsrvkm
+
+    # Complete graphics driver initialization
+    try_command /bin/pvrsrvinit
+}
+
+stop_function() {
+    # Unload the graphics kernel module
+    sleep 1
+    rmmod pvrsrvkm
+
+    # Remove the device node
+    rm -f /dev/pvrsrvkm
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

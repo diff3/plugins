@@ -1,0 +1,103 @@
+#!/bin/sh
+SCRIPTNAME=system_setup
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+mount_if_not_mounted() {
+    if [ $# -lt 3 -o $# -gt 4 ]; then
+        echo "ERROR: Invalid number of variables passed to mount function"
+        exit 1
+    fi
+
+    DEST_PATH="$1"
+    SRC_PATH="$2"
+    TYPE="$3"
+    if [ $# -eq 4 ]; then
+        OPTIONS="$4"
+    else
+        OPTIONS=""
+    fi
+
+    mount | grep -q "on $DEST_PATH "
+    if [ $? -eq 1 ]; then
+        mount -t $TYPE $OPTIONS $SRC_PATH $DEST_PATH
+    else
+        echo "INFO: $DEST_PATH was already mounted; skipping"
+    fi
+}
+
+start_function() {
+
+    # Setup the normal psuedo-filesystems
+    # Mount checking cannot be done if /proc is not mount, and because /proc
+    #   cannot be unmounted on a running system we will always try to mount.
+    #   This may cause an annoying message on re-mounts of /proc, but there is
+    #   no simple way to address it in this init script.
+    mount -t proc proc /proc
+    # added to support r/o filesystem
+    mount_if_not_mounted "/dev" "tmpfs" "tmpfs" "-o size=8m"
+    mknod /dev/console c 5 1                                    
+    mknod /dev/null c 1 3                                       
+    mknod /dev/kmsg c 1 11                                      
+    mknod /dev/spectra b 254 0                                  
+    mknod /dev/ttyS1 c 4 65                                     
+    ln -s ../proc/kcore /dev/core                               
+    mkdir /dev/pts 
+
+    mount_if_not_mounted "/dev/pts" "devpts" "devpts"
+    mount_if_not_mounted "/sys" "none" "sysfs"
+    mount_if_not_mounted "/tmp" "tmpfs" "tmpfs" "-o size=300m"
+
+    # Setup the serial device
+    stty -F /dev/ttyS1 -ixon -ixoff 115200
+
+    # set kernel logging loglevel 0, default_message_level 4, minimum_console_loglevel 1, default_console_loglevel 4
+    echo '0 4 1 4' > /proc/sys/kernel/printk
+		
+    # Mount / link /var specific directories
+    mkdir -p /var
+    if [ ! -e /var/tmp ]; then
+        #ln -s /tmp /var/tmp
+        mount_if_not_mounted "/var" "tmpfs" "tmpfs" "-o size=8m"
+    fi
+    mkdir -p --mode=a+rwx /var/log /var/run /var/lock
+    touch /var/log/lastlog
+    if [ ! -e /var/log/messages ]; then
+        ln -s /tmp/messages /var/log/messages
+    fi
+
+    # Create a mount point in /tmp
+    mkdir -p /tmp/mnt
+
+    # Start syslog
+    syslogd -O /tmp/messages
+
+    # Setup the RTC
+    make_dev rtc rtc 10 135
+}
+
+stop_function() {
+    rm -f /dev/rtc
+    killall syslogd
+    umount /var
+    umount /tmp
+    umount /sys
+    umount /dev/pts
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
+

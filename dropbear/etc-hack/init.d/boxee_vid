@@ -1,0 +1,14 @@
+#!/bin/sh
+# (c) 2010 Boxee
+
+sm=/opt/boxee/set_preferred_tvmode.sh
+cl=/bin/cl_app
+cfg=/opt/boxee/boot_vid/cl_boxee.cfg
+
+$sm
+if [ $? != 0 ]; then
+	echo "tvmode set failure"
+else
+	echo "tvmode set success"
+	nohup $cl $cfg >/dev/null 2>&1 &
+fi

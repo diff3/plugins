@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # Start System Daemon
+    TTY_PID=`ps -ef | grep -v grep | grep "/dev/ttyS1" | awk '{print $2}'`
+    if [[ "x$TTY_PID" == "x" ]]; then 
+        echo "cannot kill ttyS1"
+    else
+        kill $TTY_PID
+    fi
+
+    debug_print "Trying to System Daemon"
+    try_command /bin/sysd
+}
+
+stop_function() {
+    # Terminate daemons, remove modules, remove device nodes here
+    echo "Kill System Daemon"
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

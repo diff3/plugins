@@ -1,0 +1,269 @@
+#########################################################
+## Default DirectFB overrides 2.1
+## 
+## Specifies options to use in DirectFB.
+#########################################################
+
+#########################################################
+## If there are multiple system libraries in 
+## /usr/local/lib use the specified system.
+#########################################################
+system=intelce
+
+#########################################################
+## Permanently disable a cursor when an application uses 
+## windows.
+#########################################################
+#no-cursor
+
+#########################################################
+## Specify a path to the DirectFB module directory.
+## In release builds, the module directory is
+## "/usr/local/lib/directfb-1.2-9-pure".
+## For debug builds, the module directory is
+## "/usr/local/lib/directfb-1.2-9"
+#########################################################
+#module-dir=/usr/local/lib/directfb-1.2-9-pure
+#module-dir=/usr/local/lib/directfb-1.2-9
+
+#########################################################
+## Set the pixel format used by the DirectFB font 
+## provider.  When strings are drawn, each used font 
+## character/glyph is individually blit from a surface 
+## of the specified pixel format to the destination.
+#########################################################
+font-format=ARGB
+
+#########################################################
+## When using ARGB fonts, font data is loaded into a 
+## surface with premultiplied alpha. Setting the 
+## no-font-premult option will disable that behavior.
+#########################################################
+no-font-premult
+
+#########################################################
+## Set the minimum depth size of the depth buffer.
+#########################################################
+#depth=32
+
+#########################################################
+## Debug Domain Output
+#########################################################
+## DirectFB supports multiple debug domains that can be 
+## selectively turned on or off.  Multiple selections are 
+## allowed from multiple lines.
+##
+## NOTE: These only work on DEBUG builds and not on 
+##       RELEASE builds!!!!
+##
+## The IntelCE driver adds the following top-level 
+## domains:
+##   IntelCE
+##   IntelCE_V      (output extra details)
+##   IntelCE_V_Flip (output extra flipping details)
+##
+## The IntelCE driver adds the following sub-domains for 
+## additional control:
+##   IntelCE/DirectFBIntelCE
+##   IntelCE/Encoder
+##   IntelCE/Gfx
+##   IntelCE/Gfx/OPENGL
+##   IntelCE/Gfx/Reject   - Indicates a request was rejected and why
+##   IntelCE/Gfx/Accept   - Indicates a request was accepted
+##   IntelCE/Gfx/Flush    - Indicates the queued operations flush was performed
+##   IntelCE/IDirectFBGL
+##   IntelCE/Layer
+##   IntelCE/LayerInfo
+##   IntelCE/Mixer
+##   IntelCE/Screen
+##   IntelCE/Surface
+##   IntelCE/System
+##   IntelCE_V/DirectFBIntelCE
+##   IntelCE_V/Encoder
+##   IntelCE_V/Gfx
+##   IntelCE_V/IDirectFBGL
+##   IntelCE_V/Layer
+##   IntelCE_V/LayerInfo
+##   IntelCE_V/Mixer
+##   IntelCE_V/Screen
+##   IntelCE_V/Surface
+#########################################################
+## For example, the following four commands when used 
+## will turn on all IntelCE sub-domains except 
+## Gfx/OPENGL, Screen and System:
+##   debug=IntelCE          
+##   no-debug=IntelCE/Gfx/OPENGL
+##   no-debug=IntelCE/Screen
+##   no-debug=IntelCE/System
+#########################################################
+## Debug Commands Examples
+#########################################################
+#debug                       # Enable ALL debug output.
+#no-debug                    # Disable all debug output.
+#debug=IntelCE               # Enable all IntelCE debug 
+#                            # sub-domains.
+#no-debug=IntelCE/Gfx/OPENGL # Disable just the Gfx/OPENGL 
+#                            # sub-domain if debug is 
+#                            # already turned on.
+#no-debug=IntelCE/System     # Disable just the System 
+#                            # sub-domain if debug is 
+#                            # already turned on.
+
+#########################################################
+## Log Output
+#########################################################
+## When turning on debug output, sometimes the sheer 
+## amount can be overwhelming, yet important.  A log file 
+## can be better suited to capture the output for later 
+## digestion.
+#########################################################
+#log-file=/home/user/myDirectFBApp.log
+
+#########################################################
+## Disable DirectFB output including the DirectFB startup 
+## banner.  Only displays error messages.
+#########################################################
+#quiet
+
+#########################################################
+## Caching Policy
+## Identifies the video memory based surface caching 
+## policy used when such surfaces are created.  Setting 
+## the cache policy to "cached" indicates that if no 
+## explicit policy is specified when the surface is 
+## created (using the DSCAPS_CACHED_HINT or 
+## DSCAPS_UNCACHED_HINT surface capability flags), that 
+## the fallback policy to use is "cached" (provided that 
+## the platform and kernel both have caching enabled).  
+## Setting the cache policy to "force-cached" indicates 
+## that if an explicit surface cache policy is requested, 
+## it should be ignored and forced to be "cached".  There 
+## is also a cache policy "uncached" and "force-uncached" 
+## that behave in a similar manner.
+##
+## The default when no cache-policy is specified, is for 
+## all video memory based surfaces to be cached.
+#########################################################
+cache-policy=cached
+
+#########################################################
+## System surface alignment
+##
+## When moving data across the data bus or through the
+## CPU and GPU, aligning the data can improve efficiency
+## and performance. The downside of alignment is 
+## unused memory. The following two options allow 
+## specification of base and pitch alignment of 
+## system surfaces.
+##
+## The default value for both options is "128".
+#########################################################
+#system-surface-base-alignment=128
+#system-surface-pitch-alignment=128
+
+#########################################################
+## Non-visible Video Memory Surface Buffer Clearing
+## Automatically clears each non-visible (in other 
+## words, not associated with a display layer) video memory 
+## surface buffer allocated.  Otherwise, memory is NOT 
+## cleared after allocation.  Default is to NOT clear.
+#########################################################
+#clear-non-visible-video-memory-buffers
+#no-clear-non-visible-video-memory-buffers
+
+#########################################################
+## Visible Video Memory Surface Buffer Clearing
+## The DirectFB IntelCE drivers will automatically clear 
+## each video memory display layer surface buffer 
+## allocated.  Otherwise, memory is NOT cleared after 
+## allocation except when the display layer is single 
+## buffered and no background is configured to clear 
+## it.  Default is to NOT clear.
+#########################################################
+#clear-visible-video-memory-buffers
+#no-clear-visible-video-memory-buffers
+
+#########################################################
+## Broken Blending
+## DirectFB 1.0.1 has a bug in its blending code that
+## blends certain blend function combinations incorrectly
+## (GPU-based rendering does not suffer from this issue).  
+## The DirectFB maintainers provided a fix which has been 
+## integrated into this version of the libary.  However, 
+## in the case where someone needs to revert back to the 
+## old broken blending, a directfbrc command was added to 
+## allow that to be done.  This will be deprecated in 
+## future releases as soon as the general DirectFB 
+## distribution has the fix.  This will serve as a 
+## compatibility mode until then.
+##
+## The default is to use the new correct blending model.
+#########################################################
+#no-broken-blending
+#broken-blending
+
+#########################################################
+## HW Single Buffer Render Mode
+##
+## When using the OpenGL ES graphics driver, it is important
+## to indicate when to flush the queued operations to the
+## surface.  This is done normally on a WaitIdle or a Flip.
+## Because single buffered surfaces don't use flip, it
+## is necessary to add an option to allow deferred
+## rendering on single buffered surfaces to be enabled
+## explicitly.
+##
+## The default is to use the SW blender.
+#########################################################
+#opengl-single-buffer-render-mode=hardware
+#opengl-single-buffer-render-mode=software
+
+#########################################################
+## OpenGL ES Render Mode
+##
+## OpenGL ES performs best when it queues up several operations
+## then flushes them together, i.e. deferred rendering.
+## However, at times it is useful to be able to switch 
+## to an immediate mode rendering with the OpenGL ES driver.
+## This will negatively impact performance.
+##
+## The default is to use deferred rendering.
+#########################################################
+#opengl-rendering-mode=deferred
+#opengl-rendering-mode=immediate
+
+#########################################################
+## Choosing the HW Graphics Driver Library
+##
+## There are currently two graphics libraries being
+## provided: SRB and OpenGL ES.  The two have seperate 
+## strengths and weaknesses that are discussed in the 
+## programming guide.  This option provides a simple way
+## to switch between the two libraries.
+##
+## A surface cap can overide the default policy.  The 
+## surface cap can be overriden by using the "force-srb" or 
+## "force-opengl" option.
+##
+## The default value is "srb".
+#########################################################
+#hardware-unit-mode=srb
+#hardware-unit-mode=opengl
+#hardware-unit-mode=force-srb
+#hardware-unit-mode=force-opengl
+
+#########################################################
+## Automatic layer intialization in DFB 1.2
+##
+## The DirectFB 1.2 maintainers have added the ability
+## to specify a layer to create automatically on startup.  
+## By default this is the primary layer.  
+##
+## By specifying "no-init-layer", DirectFB will
+## wait until the application requests
+## a layer before creating it.
+##
+## The default value is "init-layer=0".
+#########################################################
+no-init-layer
+

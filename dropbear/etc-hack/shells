@@ -1,0 +1,3 @@
+/bin/sh
+/bin/true
+/data/plugins/dropbear/bin/sh-wrapper

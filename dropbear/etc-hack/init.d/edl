@@ -1,0 +1,160 @@
+#!/bin/sh
+
+#  This file is provided under a dual BSD/GPLv2 license.  When using or 
+#  redistributing this file, you may do so under either license.
+#
+#  GPL LICENSE SUMMARY
+#
+#  Copyright(c) 2007-2009 Intel Corporation. All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify 
+#  it under the terms of version 2 of the GNU General Public License as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful, but 
+#  WITHOUT ANY WARRANTY; without even the implied warranty of 
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+#  General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License 
+#  along with this program; if not, write to the Free Software 
+#  Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+#  The full GNU General Public License is included in this distribution 
+#  in the file called LICENSE.GPL.
+#
+#  Contact Information:
+#  intel.com
+#  Intel Corporation
+#  2200 Mission College Blvd.
+#  Santa Clara, CA  95052
+#  USA
+#  (408) 765-8080
+#
+#
+#  BSD LICENSE 
+#
+#  Copyright(c) 2007-2009 Intel Corporation. All rights reserved.
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without 
+#  modification, are permitted provided that the following conditions 
+#  are met:
+#
+#    * Redistributions of source code must retain the above copyright 
+#      notice, this list of conditions and the following disclaimer.
+#    * Redistributions in binary form must reproduce the above copyright 
+#      notice, this list of conditions and the following disclaimer in 
+#      the documentation and/or other materials provided with the 
+#      distribution.
+#    * Neither the name of Intel Corporation nor the names of its 
+#      contributors may be used to endorse or promote products derived 
+#      from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+#==========================================================================
+#INTEL CONFIDENTIAL
+#Copyright 2006-2009 Intel Corporation All Rights Reserved.
+#
+#The source code contained or described herein and all documents related to the source code ("Material") are owned by Intel Corporation or its suppliers or licensors. Title to the Material remains with Intel Corporation or its suppliers and licensors. The Material contains trade secrets and proprietary and confidential information of Intel or its suppliers and licensors. The Material is protected by worldwide copyright and trade secret laws and treaty provisions. No part of the Material may be used, copied, reproduced, modified, published, uploaded, posted, transmitted, distributed, or disclosed in any way without Intel's prior express written permission.
+#
+#No license under any patent, copyright, trade secret or other intellectual property right is granted to or conferred upon you by disclosure or delivery of the Materials, either expressly, by implication, inducement, estoppel or otherwise. Any license under such intellectual property rights must be express and approved by Intel in writing.
+#
+# =========================================================================
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+##########################################################################################
+# This function loads the audio DAC driver if specified and configures the DAC
+# - param[in] LOAD_DRIVER - Load the DAC kernel module (driver). 1 - Load, 0 - Don't load
+# - param[in] DAC_ID - DAC ID of the DAC you want to configure.
+# - param[in] VOLUME - Volume level for the DAC valid values are 0-100
+# - param[in] OUTPUT_PHASE_INV - Invert output phase or not. Inverted - 1, Normal - 0.
+##########################################################################################
+audio_dac_config() {
+   LOAD_DRIVER=$1
+   DAC_ID=$2
+   VOLUME=$3
+   OUTPUT_PHASE_INV=$4
+   
+   #Load the driver if specified
+   if [ "$LOAD_DRIVER" -eq 1 ]; then 
+      try_command insmod /lib/modules/edl_audio_dac_drv_linux.ko
+      make_dev audio_dac audio_dac
+   fi;
+   
+   #Configure the DAC
+   /bin/audio_dac_config dac_id=$DAC_ID volume=$VOLUME output_phase_inverted=$OUTPUT_PHASE_INV
+}
+
+start_function() {
+    try_command insmod /lib/modules/edl_thermal.ko
+    make_dev thermal thermal
+
+    #Get the name of the SOC that is running
+#    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+		SOC_NAME="SOC_NAME_CE4100"
+		
+    #Check for which SOC and load DAC driver if needed. 
+    if [ "$SOC_NAME" = "SOC_NAME_CE3100" ]; then    
+       #2ch DAC , load driver
+       audio_dac_config 1 0 100 0    
+       #8ch DAC
+       audio_dac_config 0 1 100 0  
+       
+    elif [ "$SOC_NAME" = "SOC_NAME_CE4100" ]; then   
+       #2ch DAC , load driver
+       audio_dac_config 1 0 100 1    
+       #Configure 8ch DAC
+       audio_dac_config 0 1 100 1        
+    fi;
+    
+    #GEN5 has DAC config as switches on board, not loading DAC driver
+}
+
+stop_function() {
+
+    #Get the name of the SOC that is running
+#    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+		SOC_NAME="SOC_NAME_CE4100"
+    
+    # Remove the DAC module and device
+    if [ "$SOC_NAME" = "SOC_NAME_CE3100" ] || [ "$SOC_NAME" = "SOC_NAME_CE4100" ]; then 
+       rmmod edl_audio_dac_drv_linux
+       rm -f /dev/audio_dac
+    fi;
+    
+    # Remove edl_thermal module and device
+    rmmod edl_thermal
+    rm -f /dev/thermal
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

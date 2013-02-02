@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+MODHOME=/lib/modules/2.6.28
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+	# video4linux
+	try_command insmod ${MODHOME}/videodev.ko
+	try_command insmod ${MODHOME}/dvb-core.ko
+	try_command insmod ${MODHOME}/v4l2-int-device.ko
+	try_command insmod ${MODHOME}/v4l2-common.ko
+}
+
+stop_function() {
+	rmmod videodev
+	rmmod dvb-core
+	rmmod v4l2-int-device
+	rmmod v4l2-common
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

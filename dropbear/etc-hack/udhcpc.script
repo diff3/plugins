@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# udhcpc script edited by Tim Riker <Tim@Rikers.org>
+
+[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+
+RESOLV_CONF="/etc/resolv.conf"
+[ -n "$subnet" ] && NETMASK="netmask $subnet"
+
+echo "broadcast address received from DHCP server: $broadcast"
+
+# If we didn't get a broadcast address then ifconfig below will set it to
+# class A broadcast address.  We switch to to class C here.
+# Silent removed from ipcalc call because busybox does not support it
+[ ! -n "$broadcast" ] && broadcast=`/bin/ipcalc --broadcast $ip/24 |cut -d "=" -f 2`
+
+echo "broadcast after running through ipcalc: $broadcast"
+
+# If $broadcast is not empty then set it up to be used by ifconfig
+[ -n "$broadcast" ] && broadcast="broadcast $broadcast"
+echo "broadcast final: $broadcast"
+
+case "$1" in
+	deconfig)
+		/sbin/ifconfig $interface 0.0.0.0
+		echo "deconfig" >> /tmp/udhcp.1
+		;;
+
+	renew|bound)
+		echo "/sbin/ifconfig $interface $ip $broadcast $NETMASK" >> /tmp/udhcp.1
+		echo "arg 1 is $1" >> /tmp/udhcp.1
+		/sbin/ifconfig $interface $ip $NETMASK
+
+		if [ -n "$router" ] ; then
+			echo "deleting routers"
+			while ip route del dev $interface 2>/dev/null; do
+				:
+			done
+
+			for i in $router ; do
+				ip route add default via $i dev $interface
+			done
+		fi
+
+		echo -n > $RESOLV_CONF
+		[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+		for i in $dns ; do
+			echo adding dns $i
+			echo nameserver $i >> $RESOLV_CONF
+		done
+		/opt/local/bin/ntpdate pool.ntp.org
+		;;
+esac
+
+exit 0

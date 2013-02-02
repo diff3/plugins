@@ -1,0 +1,16 @@
+#-----------------------------------------------------------------------------
+# Copyright (c) 2008 Intel Corporation
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+ 
+
+# Basic Run Time Initialization Script
+
+# DirectFB does no initialization at system boot time. That will change
+# when Fusion is added.

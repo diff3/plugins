@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+DAEMON_NAME=afpfsd
+DAEMON_BIN=/opt/local/bin/afpfsd
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # Start afpfsd if so equipped
+
+    if [ -e ${DAEMON_BIN} ]; then
+        debug_print "Trying to start ${DAEMON_NAME}"
+        try_command ${DAEMON_BIN}
+    else
+        debug_print "${DAEMON_NAME} is disabled."
+    fi
+}
+
+stop_function() {
+    # Terminate daemons, remove modules, remove device nodes here
+    DAEMON_PID=`ps -ef | grep -v grep | grep "${DAEMON_BIN}" | awk '{print $2}'`
+    if [[ "x$DAEMON_PID" == "x" ]]; then
+        echo "${DAEMON_NAME} not running; cannot kill"
+    else
+        kill $DAEMON_PID
+    fi
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

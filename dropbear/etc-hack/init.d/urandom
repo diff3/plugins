@@ -1,0 +1,45 @@
+#!/bin/sh
+# Carry urandom seed across reboots
+# Adapted from Ubuntu for busybox on Intel CE4100
+#
+# (c)2011 Boxee 
+
+SCRIPTNAME=$0
+. /etc/init.d/init_utilities
+
+[ -c /dev/urandom ] || exit 0
+
+SAVEDFILE=/data/.persistent/.random-seed
+POOLSIZE=512
+[ -f /proc/sys/kernel/random/poolsize ] && POOLSIZE="$(cat /proc/sys/kernel/random/poolsize)"
+
+debug_print "$0 POOLSIZE=$POOLSIZE"
+
+case "$1" in
+  start|"")
+    if [ -f "$SAVEDFILE" ]
+    then
+      SAVEDSIZE="$(stat $SAVEDFILE -c "%s")"
+      if [ "$SAVEDSIZE" -gt "$POOLSIZE" ]
+      then
+        [ -w /proc/sys/kernel/random/poolsize ] && echo $POOLSIZE > /proc/sys/kernel/random/poolsize
+        POOLSIZE=$SAVEDSIZE
+      fi
+      debug_print "Seeding /dev/urandom with POOLSIZE=$SAVEDSIZE"
+      cat "$SAVEDFILE" >/dev/urandom
+    fi
+    rm -f $SAVEDFILE
+    umask 077
+    debug_print "Saving /dev/urandom seed"
+    dd if=/dev/urandom of=$SAVEDFILE bs=$POOLSIZE count=1 >/dev/null 2>&1
+    ;;
+  stop)
+    umask 077
+    debug_print "Saving /dev/urandom seed"
+    dd if=/dev/urandom of=$SAVEDFILE bs=$POOLSIZE count=1 >/dev/null 2>&1
+    ;;
+  *)
+    echo "Usage: urandom start|stop" >&2
+    exit 3
+    ;;
+esac

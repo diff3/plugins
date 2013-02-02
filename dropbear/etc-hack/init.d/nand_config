@@ -1,0 +1,47 @@
+#!/bin/sh
+####################################################################
+#  Copyright (c) 2009 Intel Corporation 
+#  DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#  This Distributable As Sample Source Software is subject to the
+#  terms and conditions of the Intel Software License Agreement for
+#  the Intel(R) Media Processor Software Development Kit" 
+####################################################################
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+#    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+		SOC_NAME="SOC_NAME_CE4100"
+    if [ $SOC_NAME = "SOC_NAME_CE4100" ]; then
+		try_command insmod /lib/modules/nand_config.ko
+		make_dev nand_config nand_config
+    fi
+}
+
+stop_function() {
+#	SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+		SOC_NAME="SOC_NAME_CE4100"
+    if [ $SOC_NAME = "SOC_NAME_CE4100" ]; then
+		rmmod nand_config
+		rm -f /dev/nand_config
+	fi
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

@@ -1,0 +1,3 @@
+NETWORKING=yes
+HOSTNAME=intel_ce_linux
+DHCP_HOSTNAME=intel_ce_linux

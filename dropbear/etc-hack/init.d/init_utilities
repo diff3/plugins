@@ -1,0 +1,141 @@
+#!/bin/sh
+
+DEBUG=0
+# debug_print
+# Prints when the debugging variable above is set to 1
+debug_print() {
+    if [ $DEBUG -eq 1 ]; then
+        echo "DEBUG ($SCRIPTNAME): $*"
+    fi
+}
+
+# try_command()
+# Tries to run the command supplied as arguments. If it fails, print a message
+# and exit with error code 1
+try_command() {
+    debug_print "try_command running '$*'"
+    $*
+    if [ $? -ne 0 ]; then
+        echo "ERROR ($SCRIPTNAME): Command '$*' failed"
+        exit 1
+    fi
+}
+
+# make_dev()
+# Creates a character node based on the driver name and device name passed in.
+# If only two arguments: major number is determined from /proc/devices; 0 is
+#   used as the minor number. (if you need to specify the minor see
+#   make_dev_minor())
+# Arg 1: Driver name is it appears in /proc/devices
+# Arg 2: Name of the node to create
+# Arg 3: The nod major number,
+# Arg 4: The nod minor number, default 0.
+make_dev()
+{
+    local DRIVER=$1
+    local DEVICE=$2
+
+    rm -f /dev/$DEVICE
+    local major_number=${3:-$(egrep "[0-9]+ ${DRIVER}$" /proc/devices | cut -b1,2,3)}
+    local minor_number=${4:-"0"}
+    if [ ! -z $major_number ]; then
+        try_command /bin/mknod /dev/$DEVICE c $major_number $minor_number
+    else
+        echo "ERROR ($SCRIPTNAME): Failed creating device node $DEVICE"
+        exit 1
+    fi
+}
+
+# make_dev_minor()
+# Creates a character node for a driver; The major number is determined by
+# checking /proc/devices; Minor number is specified or defaults to 0
+# Arg 1: Driver name as it appears in /proc/devices
+# Arg 2: Name of the node to create
+# Arg 3: Minor number to use (defaults to 0)
+make_dev_minor()
+{
+    local DRIVER=$1
+    local DEVICE=$2
+    local MINOR=${3:-"0"}
+
+    rm -f /dev/$DEVICE
+    local major_number=$(egrep "[0-9]+ ${DRIVER}$" /proc/devices | cut -b1,2,3)
+    if [ ! -z $major_number ]; then
+        try_command /bin/mknod /dev/$DEVICE c $major_number $MINOR
+    else
+        echo "ERROR ($SCRIPTNAME): Failed creating device node $DEVICE"
+        exit 1
+    fi
+}
+
+
+# make_auto_dev()
+# Creates a block or character device node; uses /proc/devices to determine
+# the major number, and whether to create a block or character node
+# Arg 1: Driver name is it appears in /proc/devices
+# Arg 2: Name of the node to create
+# Arg 3: The nod minor number, if not set this defaults to 0.
+make_auto_dev()
+{
+    local DRIVER=$1
+    local DEVICE=$2
+    local MINOR=${3:-"0"}
+
+    rm -f /dev/$DEVICE
+    # Get the major number from /proc/devices
+    local major_number=$(egrep "[0-9]+ ${DRIVER}$" /proc/devices | cut -b1,2,3)
+    if [ -z $major_number ]; then
+        echo "ERROR: Could not find ${DRIVER} in /proc/devices;"
+        echo "       perhaps it hasn't been loaded yet?"
+        exit 1
+    fi
+
+    # Find out which lines contain the starts of character and block devices;
+    # and which line the requested device is on
+    local char_dev_line=$(egrep -n "^Character devices" /proc/devices | egrep -o '^[0-9]+')
+    local block_dev_line=$(egrep -n "^Block devices" /proc/devices | egrep -o '^[0-9]+')
+    local requested_dev_line=$(egrep -n "[0-9]+ ${DRIVER}" /proc/devices | egrep -o '^[0-9]+')
+
+    # Verify that we have valid entries
+    if [ -z $char_dev_line -o -z $block_dev_line ]; then
+        echo "ERROR: /proc/devices appears to be malformed;"
+        echo "       could not find block section, or character section"
+        exit 1
+    elif [ -z $requested_dev_line ]; then
+        echo "ERROR: Could not find ${DRIVER} in /proc/devices;"
+        echo "       perhaps it hasn't been loaded yet?"
+        exit 1
+    fi
+    
+    # Figure out if the requested line is in the block or character section
+    local device_type=""
+    if [ $block_dev_line -gt $char_dev_line ]; then
+        if [ $requested_dev_line -gt $block_dev_line ]; then
+            device_type="b"
+        else
+            device_type="c"
+        fi
+    else
+        if [ $requested_dev_line -gt $char_dev_line ]; then
+            device_type="c"
+        else
+            device_type="b"
+        fi
+    fi
+
+    # Create the device
+    try_command /bin/mknod /dev/$DEVICE $device_type $major_number $MINOR
+}
+
+
+
+###############################
+# Other utility ideas
+# -- Utility which kills with SIGTERM; checks if still running after a few
+#      seconds, if yes sends SIGKILL
+###############################
+
+# Sanity checks
+if [ -z $SCRIPTNAME ]; then
+    echo "No script name provided!"
+fi

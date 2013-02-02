@@ -1,0 +1,44 @@
+#!/bin/sh
+
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+MOUNT_PATH=/tmp/mnt/upnp
+DAEMON_NAME=/opt/local/bin/djmount
+
+. /etc/init.d/init_utilities
+
+start_function() {
+	if [ -e ${DAEMON_NAME} ]
+	then
+		mkdir -p ${MOUNT_PATH} > /dev/null 2>&1
+		${DAEMON_NAME} ${MOUNT_PATH} -o iocharset=UTF-8
+	else
+		debug_print "No dj_mount..."
+	fi
+}
+
+stop_function() {
+	DAEMON_PID=$(pidof ${DAEMON_NAME})
+	umount ${MOUNT_PATH} > /dev/null 2>&1
+	if [ ! -z "${DAEMON_PID}" ]
+	then
+		kill -9 ${DAEMON_PID}
+	else
+		debug_print "No djmount, doing nothing"
+	fi
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

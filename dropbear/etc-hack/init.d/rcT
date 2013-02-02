@@ -1,0 +1,17 @@
+#!/bin/sh
+. /etc/profile
+RUNLEVEL=3
+for THIS_SCRIPT in /etc/rc$RUNLEVEL.d/T*
+do
+$THIS_SCRIPT start
+RET_VAL=$?
+if [ $RET_VAL -eq 0 ]; then
+echo "$THIS_SCRIPT SUCCESS"
+else
+echo " $THIS_SCRIPT FAILED [returned: $RET_VAL]"
+echo " Exiting SysV init. Bringing up the console if possible."
+echo
+exit 1
+fi
+done
+

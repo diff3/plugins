@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # Install modules, make device nodes, start daemons here
+
+    # Leave the following command in until this function is implemented
+    echo "This command prevents an error" > /dev/null
+}
+
+stop_function() {
+    # Terminate daemons, remove modules, remove device nodes here
+    
+    # Leave the following command in until this function is implemented
+    echo "This command prevents an error" > /dev/null
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

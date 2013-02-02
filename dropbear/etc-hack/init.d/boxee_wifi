@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Copyright(c) 2011 Boxee, Inc. and/or its subsidiaries.  All rights reserved.
+#
+
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/opt/local/bin
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/local/lib
+WIRELESS_ROOT=/opt/local/etc/Wireless
+
+. /etc/init.d/init_utilities
+. /opt/boxee/hal/scripts/wireless_utils
+
+start_function() {
+	# short and sweet
+	/opt/boxee/hal/scripts/wireless_config2 eth1 init
+	# ignore errors
+	return 0
+}
+
+stop_function() {
+	# short and sweet
+	/opt/boxee/hal/scripts/wireless_config2 eth1 deinit
+	# ignore errors
+	return 0
+}
+
+case $1 in
+	"start")
+		start_function
+	;;
+	"stop")
+		stop_function
+	;;
+	"restart")
+		stop_function
+		start_function
+	;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+esac

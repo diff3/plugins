@@ -1,0 +1,84 @@
+#!/bin/sh
+#  GPL LICENSE SUMMARY
+#
+#  Copyright(c) 2005-2008 Intel Corporation. All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of version 2 of the GNU General Public License as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful, but
+#  WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+#  The full GNU General Public License is included in this distribution
+#  in the file called LICENSE.GPL.
+#
+#  Contact Information:
+#    Intel Corporation
+#    2200 Mission College Blvd.
+#    Santa Clara, CA  97052
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+
+    # Remove any left-over nodes
+#    rm -Rf /dev/snd
+    
+    # Insert required alsa modules
+    try_command insmod /lib/modules/sound/acore/snd.ko
+    try_command insmod /lib/modules/sound/acore/snd-timer.ko
+    try_command insmod /lib/modules/sound/acore/snd-page-alloc.ko
+    try_command insmod /lib/modules/sound/acore/snd-pcm.ko
+    try_command insmod /lib/modules/sound/acore/seq/snd-seq-device.ko
+    try_command insmod /lib/modules/sound/acore/snd-hwdep.ko
+    try_command insmod /lib/modules/sound/acore/snd-rawmidi.ko
+    #try_command insmod /lib/modules/sound/usb/snd-usb-lib.ko
+    #try_command insmod /lib/modules/sound/usb/snd-usb-audio.ko
+
+    # make proper alsa dev nodes
+#    try_command mkdir -p /dev/snd
+#    try_command mknod /dev/snd/controlC0 c 116  0
+#    try_command mknod /dev/snd/hwC0D0    c 116  4
+#    try_command mknod /dev/snd/pcmC0D0p  c 116 16
+#    try_command mknod /dev/snd/timer     c 116 33
+
+}
+
+stop_function() {
+    #rmmod snd-usb-audio
+    #rmmod snd-usb-lib
+    rmmod snd-rawmidi
+    rmmod snd-hwdep
+    rmmod snd-seq-device
+    rmmod snd-pcm
+    rmmod snd-page-alloc
+    rmmod snd-timer
+    rmmod snd
+
+    rm -Rf /dev/snd
+}
+
+case $1 in
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
+esac

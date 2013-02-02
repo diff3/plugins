@@ -1,0 +1,102 @@
+#!/bin/sh
+# oem specific script
+
+SCRIPTNAME=$0
+. /etc/init.d/init_utilities
+
+DATA=/data
+DOWNLOAD=/download
+REQDIRS=".boxee .persistent/.mrwong .macromedia"
+
+# DATA PARTITION
+mountpoint $DATA > /dev/null 2>&1
+if [ $? != 0 ]
+then
+	PART=/dev/Glob_Spectraa3
+	FIXME=$(/sbin/e2fsck -f -n ${PART} | grep -v "time is in the future." | grep "Fix? no" -c)
+	if [ $FIXME != 0 ]
+	then
+		/sbin/e2fsck -p -v ${PART}
+		if [ $? -ge 4 ]
+		then
+			FIXME=1
+		else
+			FIXME=0
+			mount $PART $DATA || FIXME=1
+		fi
+	else
+		mount $PART $DATA || FIXME=1
+	fi
+	sync
+	if [ ${FIXME} != 0 ]
+	then
+		umount $PART
+		echo "*** EEEEK METHINKS DATA PARTITION IS FRAGGED, RECOVERING"
+		echo -n "mkfs... "
+		/sbin/mkfs.ext3 -m0 -F -v $PART 2>&1 >/dev/null
+		sync
+		echo -n "mounting... "
+		mount $PART $DATA
+		echo -n "staging... "
+		tar xf /opt/data_rec.tar -C /
+		sync
+		echo "done. I hope."
+	fi
+fi
+
+# DOWNLOAD PARTITION
+mountpoint $DOWNLOAD > /dev/null 2>&1
+if [ $? != 0 ]; then
+	PART=/dev/Glob_Spectraa4
+	FIXME=$(/sbin/e2fsck -f -n ${PART} | grep -v "time is in the future." | grep "Fix? no" -c)
+	if [ $FIXME != 0 ]
+	then
+		/sbin/e2fsck -p -v ${PART}
+		if [ $? -ge 4 ]
+		then
+			FIXME=1
+		else
+			FIXME=0
+			mount $PART $DOWNLOAD -onoexec,nosuid || FIXME=1
+		fi
+	else
+		mount $PART $DOWNLOAD -onoexec,nosuid || FIXME=1
+	fi
+
+	if [ ${FIXME} != 0 ]
+	then
+		umount $PART
+		echo "*** EEEEK METHINKS DOWNLOAD PARTITION IS FRAGGED, RECOVERING"
+		echo -n "mkfs... "
+		/sbin/mkfs.ext3 -m0 -F -v $PART 2>&1 >/dev/null
+		sync
+		echo -n "mounting... "
+		mount $PART $DOWNLOAD -onoexec,nosuid
+		echo "done. I hope."
+	fi
+fi
+
+for d in $REQDIRS
+do
+	if [ ! -d $DATA/$d ]
+	then
+		echo -n "-> adding ${DATA}/${d}: "
+		mkdir -p $DATA/$d 2>&1 >/dev/null
+		if [ $? != 0 ]
+		then
+			echo "ERROR!"
+		else
+			echo "SUCCESS"
+		fi
+	fi
+done
+
+if [ ! -f /data/etc/hostname ]
+then
+	echo "boxeebox" >/data/etc/hostname
+fi
+
+if [ ! -f /data/etc/hosts ]
+then
+	touch /data/etc/hosts
+fi

@@ -1,0 +1,8 @@
+[2013/01/29 23:11:00] minidlna.c:888: warn: Starting MiniDLNA version 1.0.24 [SQLite 3.5.9].
+[2013/01/29 23:11:00] minidlna.c:911: warn: Creating new database...
+[2013/01/29 23:11:00] scanner.c:727: warn: Scanning /tmp/mnt/BEFB-E0F7/downloads
+[2013/01/29 23:11:00] minidlna.c:988: warn: HTTP listening on port 8100
+[2013/01/29 23:11:01] upnpsoap.c:1739: warn: Returning UPnPError 402: Invalid Args
+[2013/01/29 23:11:02] upnpsoap.c:1739: warn: Returning UPnPError 402: Invalid Args
+[2013/01/29 23:11:03] scanner.c:798: warn: Scanning /tmp/mnt/BEFB-E0F7/downloads finished (2 files)!
+[2013/01/29 23:11:03] playlist.c:125: warn: Parsing playlists...

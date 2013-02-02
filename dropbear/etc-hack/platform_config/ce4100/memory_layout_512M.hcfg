@@ -1,0 +1,117 @@
+// NOTE: This layout starts at address 0, it is assumed that the memshift option in platform_config_app is used to shift the layout above the OS memory
+// Entries starting with smd_buffers* are processed by the SMD core, the name really doesn't matter other than the beginning, except that each entry must have a unique name.
+// Entries starting with smd_frame_buffers* are also processed by the SMD core, the name really doesn't matter other than the beginning, except that each entry must have a unique name.
+
+//----------------------------------
+//Buffers needed by Audio (23MB)
+smd_buffers_ADSPFW     { buf_size = 0x200000  base = 0x00000000  size = 0x00400000 } // (  4MB) 2x2MB Audio DSP Firmware and Debug (MUST BE 1MB ALIGNED)
+smd_buffers_ADEC       { buf_size =  0x60000  base = 0x00400000  size = 0x00120000 } // (1.1MB) 3x384KB Audio Decoder API/Scratch/Persistant
+smd_buffers_ALSA       { buf_size =   0x2000  base = 0x00520000  size = 0x00040000 } // (256KB) 32x8KB buffers for the Alsa Shim
+smd_buffers_ADSP_Jobs  { buf_size =   0x2000  base = 0x00560000  size = 0x0007E000 } // (504KB) 63x8KB Audio Pipeline Job Descriptors
+smd_buffers_ADSP_AUX   { buf_size =    0x800  base = 0x005DE000  size = 0x00002000 } // (  8KB) 4x2KB Audio Pipeline Auxiliary
+smd_buffers_APSM_Stage { buf_size =  0x40000  base = 0x005E0000  size = 0x00040000 } // (256KB) 1x256KB Audio Pipeline Stages
+smd_buffers_AUD_ES1    { buf_size =   0x2000  base = 0x00620000  size = 0x00080000 } // (512KB) 64x8KB Audio ES Data from Demux to Audio Stream 1
+smd_buffers_AUD_ES2    { buf_size =   0x2000  base = 0x006A0000  size = 0x00080000 } // (512KB) 64x8KB Audio ES Data from Demux to Audio Stream 2
+smd_buffers_AUD_ES_Ext { buf_size =   0x2000  base = 0x00720000  size = 0x00200000 } // (2MB)   256x8KB Audio ES Data for extended use cases (BD audio)
+smd_buffers_APSM_Data  { buf_size =  0x10000  base = 0x00920000  size = 0x00880000 } // (8.5MB) 136x64KB Audio Pipeline Data for average use case
+smd_buffers_APSM_Ext   { buf_size =  0x10000  base = 0x011A0000  size = 0x00560000 cached = 1 } // (5.37MB)86x64KB  Audio Pipeline cached data.
+
+//----------------------------------
+//Buffers needed by Demux (3.25MB)
+smd_buffers_DMX_PSI    { buf_size =   0x1000  base = 0x01700000  size = 0x00100000 } // (  1MB) 256x4KB PSI Output
+smd_buffers_TSI_IN1    { buf_size =  0x80000  base = 0x01800000  size = 0x00080000 } // (512KB) 1x512kB TSI Input Circular Buffer Stream 1
+smd_buffers_TSI_IN2    { buf_size =  0x80000  base = 0x01880000  size = 0x00080000 } // (512KB) 1x512kB TSI Input Circular Buffer Stream 2
+smd_buffers_DMXIN1     { buf_size =   0x8000  base = 0x01900000  size = 0x00080000 } // (512KB) 16x32KB Demux Input Stream 1
+smd_buffers_DMXIN2     { buf_size =   0x8000  base = 0x01980000  size = 0x00080000 } // (512KB) 16x32KB Demux Input Stream 2
+smd_buffers_DMX_DESC1  { buf_size =   0x8000  base = 0x01A00000  size = 0x00008000 } // ( 32KB) 1x32KB Demux Data Descriptors Stream 1
+smd_buffers_DMX_DESC2  { buf_size =   0x8000  base = 0x01A08000  size = 0x00008000 } // ( 32KB) 1x32KB Demux Data Descriptors Stream 2
+smd_buffers_DMX_FW     { buf_size =  0x10000  base = 0x01A10000  size = 0x00010000 } // ( 64KB) 1x64KB Demux Firmware
+
+//----------------------------------
+//Buffers needed by DPE / VidPProc (23.875MB)
+smd_buffers_VPP_BLACK  { buf_size = 0x1E0000  base = 0x01A20000  size = 0x001E0000 } // (1.6MB) 1x1.625MB VidPProc Black Border
+smd_buffers_VPPFW      { buf_size =  0x20000  base = 0x01C00000  size = 0x00020000 } // (128KB) 1x128KB VidPProc Firmware and Message Queues
+smd_buffers_VPPYSCALE  { buf_size =  0x60000  base = 0x01C20000  size = 0x00060000 } // (374KB) 1x374KB VidPProc Y Scaler Coefficients
+smd_buffers_VPPUVSCALE { buf_size =  0x30000  base = 0x01C80000  size = 0x00030000 } // (192KB) 1x192KB VidPProc UV Scaler Coefficients 1
+smd_buffers_VPUVSCALE2 { buf_size =  0x10000  base = 0x01CB0000  size = 0x00010000 } // (64KB) 1x64KB VidPProc UV Scaler Coefficients 2
+smd_buffers_VPP_YUV1   { buf_size = 0x660000  base = 0x01CC0000  size = 0x00660000 } // (6.4MB) 3x2.125MB VidPProc Intermediate Stream 1
+smd_buffers_VPP_MH1    { buf_size = 0x220000  base = 0x02320000  size = 0x00440000 } // (4.2MB) 2x2.125MB VidPProc Motion History Stream 1
+smd_buffers_VPP_YUV2   { buf_size = 0x660000  base = 0x02760000  size = 0x00660000 } // (6.4MB) 3x2.125MB VidPProc Intermediate Stream 2
+smd_buffers_VPP_MH2    { buf_size = 0x220000  base = 0x02DC0000  size = 0x00440000 } // (4.2MB) 2x2.125MB VidPProc Motion History Stream 2
+
+//----------------------------------
+//Buffers needed by SVEN/OMAR (~2MB)
+omar_buf               {                      base = 0x03200000  size = 0x00100000 } // (  1MB) OMAR trace buffer, must be aligned on "size" boundary.
+sven_buf               {                      base = 0x03300000  size = 0x00100000 } // (  1MB) SVEN trace buffer, must be aligned on "size" boundary.
+sven_hdr               {                      base = 0x03400000  size = 0x00001000 } // (  4KB) sven header buffer
+omar_hdr               {                      base = 0x03401000  size = 0x00001000 } // (  4KB) omar header buffer
+
+//----------------------------------
+// HDMI memory (32KB)
+display_hdmi_dma       {                      base = 0x03402000  size = 0x00008000 } // (  32K) HDMI DMA Descriptors
+//empty_space          {                      base = 0x0340A000  size = 0x00036000 } // ( 216K) empty space
+
+//----------------------------------
+// Display memory (70MB)
+display                {                      base = 0x03440000  size = 0x04600000 } // ( 70MB) Display Memory
+
+//----------------------------------
+//SMD Video Frame buffers (159.375MB)
+//Each buffer region is 2*1088*2*stride bytes = 8,912,896 bytes if stride is 2k
+//For 1080p, two buffers fit in one region.
+//For 720p, a 3:2 packing ratio is achieved. 
+//The region height is a configurable option, specified in platform_config.hcfg
+//
+// core->frame_buffer_properties->region_height
+//
+// 
+smd_frame_buffers      {                      base = 0x07A40000  size = 0x09F60000 } // (159.375MB) used to allocate 37.5 frame buffer regions
+
+//----------------------------------
+//Buffers needed by VidDec (18.5MB)
+smd_buffers_VID_ES1    { buf_size =   0x8000  base = 0x119A0000  size = 0x00800000 } // (  8MB) 256x32KB Video ES Data from Demux to VidDec Stream 1
+smd_buffers_VID_ES2    { buf_size =   0x8000  base = 0x121A0000  size = 0x00800000 } // (  8MB) 256x32KB Video ES Data from Demux to VidDec Stream 2
+smd_buffers_VUSER1     { buf_size =    0x400  base = 0x129A0000  size = 0x00010000 } // ( 64KB) 64x1KB VidDec User-Data Buffers Stream 1
+smd_buffers_VUSER2     { buf_size =    0x400  base = 0x129B0000  size = 0x00010000 } // ( 64KB) 64x1KB VidDec User-Data Buffers Stream 2
+// buffers added for CE4100 driver
+smd_buffers_MFD_PFW    { buf_size = 0x020000  base = 0x129C0000  size = 0x00020000 } // (128 KB) for loading Parser  FW
+smd_buffers_MFD_DFW    { buf_size = 0x010000  base = 0x129E0000  size = 0x00010000 } // ( 64 KB) for loading decoder FW
+smd_buffers_MFD_SCR    { buf_size = 0x028000  base = 0x129F0000  size = 0x00028000 } // (160 KB) for loading scratch mem for Decoder FW
+smd_buffers_MFD_WLD    { buf_size = 0x008000  base = 0x12A18000  size = 0x00200000 } // (32KB each) for 128 workloads(need to change to 32KB and 64 workloads)
+smd_buffers_MFD_PSH    { buf_size = 0x030000  base = 0x12C18000  size = 0x00060000 } // (192 KB) for all parser stream handles.
+smd_buffers_MFD_DSH    { buf_size = 0x500000  base = 0x12C78000  size = 0x00a00000 } // (5MB) for all Decoder stream handles due to VC1
+smd_buffers_MFD_TST    { buf_size = 0x100000  base = 0x13678000  size = 0x00100000 } // (1MB) for viddec_app Video Decoder test app
+
+// TOP of layout = 0x13778000 (311.46MB) + the offset assigned with the memshift option in platform_config_app
+
+// buffer for A/V sync correction
+smd_buffers_AUD_PER_OUTPUT_DELAY { buf_size = 0x0004B000 base = 0x13720000 size = 0x001C2000 }
+
+//------------------------------------------------------------------------------
+//----  SEE COMMENT BELOW FOR ENTRIES BELOW THIS POINT
+//------------------------------------------------------------------------------
+
+// The entries above define static memory regions REQUIRED by the stack.
+// Software components will query these regions using the pre-defined names in
+// the above entries when the stack is initialized.
+//
+// Additional definitions can be added for regions of memory that can be made
+// *dynamically* available (at runtime) to the display driver via the
+// gdl_attach_heap() API; this memory then becomes available for graphics
+// applications (see the documentation of the gdl_attach_heap() API for
+// details).
+//
+// It is assumed that dynamic regions will overlap the static regions defined
+// above for video playback, and that a controlling application will terminate
+// all video playback to make the memory available before starting a
+// graphics-intensive application that will call gdl_attach_heap().
+//
+// Add definitions below this point, using the same format as above; i.e.,
+//
+//    <heap_name> { base = <start_address> size = <heap_size_in_bytes> }
+//
+// <start_address> and <size> must be multiples of the system page size.
+//
+// <heap_name> can be any unique arbitrary string.  It should be passed
+// to gdl_attach_heap() at runtime.
+

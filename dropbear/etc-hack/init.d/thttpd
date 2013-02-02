@@ -1,0 +1,35 @@
+#!/bin/sh
+
+SCRIPTNAME=$0
+PIDFILE=/var/run/thttpd.pid
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+        debug_print "Starting thttpd for Support Tool.."
+	/opt/local/bin/thttpd_wrapper &
+}
+
+stop_function() {
+        debug_print "Stopping thttpd for Support Tool.."
+	if [ -f $PIDFILE ]; then
+		kill -USR1 `cat $PIDFILE`
+		rm $PIDFILE >/dev/null
+	fi
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
