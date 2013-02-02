@@ -4,7 +4,6 @@
   if [ "$1" == "start" ]; then
      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${BASEDIR}/lib
      
-     chmod +x ${BASEDIR}/bin/php
      chmod +x ${BASEDIR}/bin/php-cgi
      
      /data/hack/bin/busybox httpd -p 80 -h ${BASEDIR}/www -c /data/plugins/webserver/httpd.conf &
